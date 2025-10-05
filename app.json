@@ -12,12 +12,6 @@
       "repo_url": "https://github.com/decyphertek-io/app-store",
       "folder_path": "apps/ansible/",
       "enable_by_default": false
-    },
-    "netrunner": {
-      "id": "netrunner",
-      "repo_url": "https://github.com/decyphertek-io/app-store",
-      "folder_path": "apps/netrunner/",
-      "enable_by_default": false
     }
   }
 }
