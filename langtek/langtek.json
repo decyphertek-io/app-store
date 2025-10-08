@@ -1,0 +1,22 @@
+{
+    "id": "langtek",
+    "name": "LangTek",
+    "description": "Spanish language learning app with RSS feed reader, translation tools, and interactive learning features.",
+    "version": "1.0.0",
+    "author": "DecypherTek",
+    "entry_point": "langtek.app",
+    "class_name": "LangTekApp",
+    "ui": {
+        "icon": "TRANSLATE",
+        "color": "blue"
+    },
+    "capabilities": [
+        "language_learning",
+        "rss_reading",
+        "translation",
+        "text_to_speech",
+        "interactive_learning",
+        "dictionary_management",
+        "feed_management"
+    ]
+}
