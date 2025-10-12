@@ -4,13 +4,13 @@
     "langtek": {
       "id": "langtek",
       "repo_url": "https://github.com/decyphertek-io/app-store",
-      "folder_path": "apps/langtek/",
+      "folder_path": "langtek/",
       "enable_by_default": false
     },
     "ansible": {
       "id": "ansible",
       "repo_url": "https://github.com/decyphertek-io/app-store",
-      "folder_path": "apps/ansible/",
+      "folder_path": "ansible/",
       "enable_by_default": false
     }
   }
