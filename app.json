@@ -11,13 +11,13 @@
         "docs": "chromadb.md"
       },
       "install_path": "~/.decyphertek.ai/app-store/chromadb/",
-      "enable_by_default": true
+      "enabled": true
     },
     "ansible": {
       "id": "ansible",
       "repo_url": "https://github.com/decyphertek-io/app-store",
       "folder_path": "ansible/",
-      "enable_by_default": false
+      "enabled": false
     }
   }
 }
