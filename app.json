@@ -2,9 +2,9 @@
   "_version": "1.0.0",
   "apps": {
     "langtek": {
-      "id": "langtek",
+      "id": "chromadb",
       "repo_url": "https://github.com/decyphertek-io/app-store",
-      "folder_path": "langtek/",
+      "folder_path": "chromadb/",
       "enable_by_default": false
     },
     "ansible": {
