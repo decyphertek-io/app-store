@@ -1,0 +1,15 @@
+{
+  "id": "chromadb",
+  "name": "ChromaDB Vector Database",
+  "description": "Standalone vector database server for RAG functionality with configurable folder access",
+  "version": "1.0.0",
+  "type": "server",
+  "port": 8000,
+  "features": [
+    "Vector storage and retrieval",
+    "Persistent collections",
+    "Folder access control",
+    "Local-only operation",
+    "No system dependencies"
+  ]
+}

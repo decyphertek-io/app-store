@@ -1,10 +1,16 @@
 {
   "_version": "1.0.0",
   "apps": {
-    "langtek": {
+    "chromadb": {
       "id": "chromadb",
       "repo_url": "https://github.com/decyphertek-io/app-store",
       "folder_path": "chromadb/",
+      "files": {
+        "executable": "dist/chromadb.app",
+        "config": "config.json",
+        "docs": "chromadb.md"
+      },
+      "install_path": "~/.decyphertek.ai/app-store/chromadb/",
       "enable_by_default": false
     },
     "ansible": {
