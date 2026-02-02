@@ -11,7 +11,7 @@
         "docs": "chromadb.md"
       },
       "install_path": "~/.decyphertek.ai/app-store/chromadb/",
-      "enable_by_default": false
+      "enable_by_default": true
     },
     "ansible": {
       "id": "ansible",
