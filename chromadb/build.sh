@@ -20,6 +20,10 @@ source .venv/bin/activate
 uv pip install chromadb uvicorn fastapi pyinstaller
 
 echo ""
+echo "Cleaning previous build..."
+rm -rf dist build *.spec
+
+echo ""
 echo "Building executable with PyInstaller..."
 pyinstaller --onefile \
     --name chromadb.app \
