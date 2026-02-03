@@ -6,15 +6,16 @@ Self-contained ChromaDB server with configurable folder access
 import chromadb
 from chromadb.config import Settings
 from pathlib import Path
-import json
+import yaml
 import sys
 
 # Paths
 HOME = Path.home()
 APP_DIR = HOME / ".decyphertek.ai"
+CONFIGS_DIR = APP_DIR / "configs"
 APP_STORE_DIR = APP_DIR / "app-store"
 CHROMADB_DIR = APP_STORE_DIR / "chromadb"
-CONFIG_FILE = CHROMADB_DIR / "config.json"
+CONFIG_FILE = CONFIGS_DIR / "cdb-config.yaml"
 DB_PATH = CHROMADB_DIR / "data"
 
 def load_config():
@@ -39,10 +40,11 @@ def load_config():
             ]
         }
         CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG_FILE.write_text(json.dumps(default_config, indent=2))
+        with open(CONFIG_FILE, 'w') as f:
+            yaml.dump(default_config, f, default_flow_style=False)
         return default_config
     
-    return json.loads(CONFIG_FILE.read_text())
+    return yaml.safe_load(CONFIG_FILE.read_text())
 
 def check_folder_access(folder_path: str, config: dict) -> bool:
     """Check if folder access is allowed based on config"""
