@@ -1,0 +1,3 @@
+$ pip install libretranslate
+$ libretranslate
+$ curl -X POST http://localhost:5000/translate -d q="Hello" -d source=en -d target=es
