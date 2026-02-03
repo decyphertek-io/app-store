@@ -1,0 +1,16 @@
+apps:
+  chromadb:
+    id: chromadb
+    repo_url: https://github.com/decyphertek-io/app-store
+    folder_path: chromadb/
+    executable: dist/chromadb.app
+    config: cdb-config.yaml
+    config_path: ~/.decyphertek.ai/configs/
+    install_path: ~/.decyphertek.ai/app-store/chromadb/
+    enabled: true
+
+  ansible:
+    id: ansible
+    repo_url: https://github.com/decyphertek-io/app-store
+    folder_path: ansible/
+    enabled: false
