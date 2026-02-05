@@ -9,6 +9,14 @@ apps:
     install_path: ~/.decyphertek.ai/app-store/chromadb/
     enabled: true
 
+  libretranslate:
+    id: libretranslate
+    repo_url: https://github.com/decyphertek-io/app-store
+    folder_path: libretranslate/
+    executable: dist/libretranslate.app
+    install_path: ~/.decyphertek.ai/app-store/libretranslate/
+    enabled: true
+
   ansible:
     id: ansible
     repo_url: https://github.com/decyphertek-io/app-store
