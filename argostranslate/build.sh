@@ -2,7 +2,7 @@
 
 set -e
 
-echo "=== LibreTranslate App Build Script ==="
+echo "=== Argos Translate App Build Script ==="
 echo ""
 
 if ! command -v uv &> /dev/null; then
@@ -17,7 +17,7 @@ echo ""
 echo "Installing dependencies with uv (Python 3.12)..."
 uv venv --clear --python 3.12
 source .venv/bin/activate
-uv pip install libretranslate pyinstaller
+uv pip install argostranslate pyinstaller
 
 echo ""
 echo "Cleaning previous build..."
@@ -26,14 +26,20 @@ rm -rf dist build *.spec
 echo ""
 echo "Building executable with PyInstaller..."
 pyinstaller --onefile \
-    --name libretranslate.app \
+    --name argostranslate.app \
     --clean \
-    libretranslate.py
+    --collect-all argostranslate \
+    --hidden-import argostranslate.package \
+    --hidden-import argostranslate.translate \
+    --hidden-import ctranslate2 \
+    --hidden-import sentencepiece \
+    --hidden-import stanza \
+    argos_app.py
 
 echo ""
 echo "Cleaning up build artifacts..."
 rm -rf .venv build *.spec
 
 echo ""
-echo "✓ Build complete! Executable: dist/libretranslate.app"
+echo "✓ Build complete! Executable: dist/argostranslate.app"
 echo "✓ Clean build - no .venv or artifacts left behind"
