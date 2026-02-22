@@ -172,14 +172,32 @@ def show_help():
     print(f"\n{YELLOW}All other commands pass through like a normal terminal{RESET}\n")
 
 def execute_command(cmd):
-    # Check for simplified commands first
     cmd_lower = cmd.lower().strip()
     
-    # Try to match simplified command patterns
+    # Intercept help commands
+    if cmd_lower == "aws help":
+        print(f"\n{CYAN}AWS SIMPLIFIED COMMANDS:{RESET}")
+        print(f"  aws list instances/buckets/users/functions/databases")
+        print(f"  aws start/stop instance <id>")
+        print(f"  aws create/delete bucket <name>\n")
+        return
+    elif cmd_lower == "gcp help":
+        print(f"\n{CYAN}GCP SIMPLIFIED COMMANDS:{RESET}")
+        print(f"  gcp list instances/buckets/functions/databases")
+        print(f"  gcp start/stop instance <name>")
+        print(f"  gcp create/delete bucket <name>\n")
+        return
+    elif cmd_lower == "azure help":
+        print(f"\n{CYAN}AZURE SIMPLIFIED COMMANDS:{RESET}")
+        print(f"  azure list vms/storage/functions/databases")
+        print(f"  azure start/stop vm <name>")
+        print(f"  azure create/delete storage <name>\n")
+        return
+    
+    # Check for simplified commands
     actual_cmd = None
     for simple_cmd, real_cmd in SIMPLIFIED_COMMANDS.items():
         if cmd_lower.startswith(simple_cmd):
-            # Extract any additional arguments after the simplified command
             extra_args = cmd[len(simple_cmd):].strip()
             actual_cmd = f"{real_cmd} {extra_args}".strip()
             break
