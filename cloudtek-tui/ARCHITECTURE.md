@@ -1,29 +1,59 @@
 # cloudtek-tui Architecture
 
 ## Overview
-cloudtek-tui is a unified Terminal User Interface wrapping AWS CLI, GCP gcloud, and Azure CLI for cloud management, plus security/compliance tool (Cloud Custodian) and IaC tools (Ansible, Pulumi). Built with pure Python, packaged as a standalone executable using UV + PyInstaller.
+CloudTek is a traditional terminal interface for multi-cloud management (AWS, GCP, Azure) with simplified commands. First-run setup wizard configures credentials automatically. Built as standalone PyInstaller executable.
 
 ## Design Principles
-- **CLI Wrapper**: TUI wrapper for AWS CLI, Azure CLI, gcloud - uses subprocess calls, not Python SDKs
+- **Traditional Terminal**: Standard terminal I/O (input/print), NOT TUI widgets
+- **Simplified Commands**: `aws`, `gcp`, `azure`, `custodian`, `pulumi`, `ansible` (easier to remember)
+- **First-Run Setup**: Interactive wizard saves credentials to `~/.decyphertek.ai/app-store/cloudtek-tui/`
+- **Auto-Configuration**: Sets environment paths so CLI tools use custom credential locations
+- **Nice Output**: Pretty JSON formatting, colored output, tables
 - **Standalone Binary**: Single executable via PyInstaller, no Python runtime required
-- **Clean Builds**: UV creates isolated venv, builds, then removes all artifacts
-- **Textual Framework**: Modern async TUI with rich widgets (https://textual.textualize.io/)
-- **Simplified Interface**: Abstract complex CLI commands into intuitive TUI actions
 
 ## Technology Stack
 - **Language**: Python 3.13
-- **TUI Framework**: Textual
+- **Interface**: Traditional terminal (input/print with ANSI colors)
 - **Package Manager**: UV (no pyproject.toml needed)
 - **Bundler**: PyInstaller 6.19.0 (--onefile)
 - **Cloud CLI Tools**:
-  - AWS: awscli (AWS CLI via subprocess)
-  - GCP: gcloud (system package, called via subprocess)
-  - Azure: azure-cli (Azure CLI via subprocess)
+  - AWS: awscli (called via subprocess)
+  - GCP: gcloud (called via subprocess)
+  - Azure: az CLI (called via subprocess)
 - **Security/Compliance Tools**:
   - Cloud Custodian: c7n (policy-as-code for cloud governance)
 - **IaC Tools**:
   - Ansible: ansible-core (automation and configuration)
   - Pulumi: pulumi (pure Python IaC, local, no account required)
+
+## Simplified Command Mapping
+
+CloudTek uses simplified commands that map to actual CLI tools:
+
+| Simplified Command | Maps To | Description |
+|-------------------|---------|-------------|
+| `aws <args>` | `aws <args>` | AWS CLI commands |
+| `gcp <args>` | `gcloud <args>` | Google Cloud CLI commands |
+| `azure <args>` | `az <args>` | Azure CLI commands |
+| `custodian <args>` | `c7n <args>` | Cloud Custodian policy commands |
+| `pulumi <args>` | `pulumi <args>` | Pulumi IaC commands |
+| `ansible <args>` | `ansible <args>` | Ansible automation commands |
+
+## First-Run Setup Flow
+
+1. Launch CloudTek executable
+2. Check if credentials exist at `~/.decyphertek.ai/app-store/cloudtek-tui/`
+3. If not found → Run interactive setup wizard:
+   - Prompt for AWS credentials (access key, secret key)
+   - Prompt for GCP service account JSON path
+   - Prompt for Azure login
+4. Save credentials to custom directory
+5. Set environment variables:
+   - `AWS_SHARED_CREDENTIALS_FILE`
+   - `AWS_CONFIG_FILE`
+   - `GOOGLE_APPLICATION_CREDENTIALS`
+6. Display CloudTek banner
+7. Drop to terminal prompt: `cloudtek>`
 
 ## System Architecture
 

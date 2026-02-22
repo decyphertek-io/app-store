@@ -1,287 +1,250 @@
 #!/usr/bin/env python3
 """
-cloudtek-tui - Unified TUI for AWS, GCP, and Azure cloud management
-Pure Python implementation using native SDKs (boto3, google-cloud-*, azure-*)
+CloudTek - Multi-Cloud Terminal Management System
 """
-from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Header, Footer, Button, Static, Label
-from textual.binding import Binding
 from pathlib import Path
+import subprocess
+import json
 import yaml
 import sys
+import os
 
 HOME = Path.home()
 APP_DIR = HOME / ".decyphertek.ai/app-store/cloudtek-tui"
-CONFIG_FILE = APP_DIR / "config.yaml"
 AWS_CREDS_DIR = APP_DIR / "aws"
 GCP_CREDS_DIR = APP_DIR / "gcp"
 AZURE_CREDS_DIR = APP_DIR / "azure"
 
-class ProviderCard(Static):
-    """Card widget for cloud provider selection"""
-    
-    def __init__(self, provider_name: str, status: str = "Inactive", **kwargs):
-        super().__init__(**kwargs)
-        self.provider_name = provider_name
-        self.status = status
-    
-    def compose(self) -> ComposeResult:
-        yield Label(f"[bold]{self.provider_name}[/bold]")
-        yield Label(f"Status: {self.status}")
+GREEN = "\033[92m"
+CYAN = "\033[96m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+MAGENTA = "\033[95m"
+RESET = "\033[0m"
 
-def check_credentials() -> dict:
-    """Check which providers have credentials configured"""
-    return {
-        'aws': (AWS_CREDS_DIR / "credentials").exists(),
-        'gcp': (GCP_CREDS_DIR / "application_default_credentials.json").exists(),
-        'azure': (AZURE_CREDS_DIR / "credentials.json").exists()
-    }
+BANNER = f"""{GREEN}
+╔═════════════════════════════════════════════════════════════════╗
+║  ██████╗██╗      ██████╗ ██╗   ██╗██████╗ ████████╗███████╗██╗  ██╗ ║
+║ ██╔════╝██║     ██╔═══██╗██║   ██║██╔══██╗╚══██╔══╝██╔════╝██║ ██╔╝ ║
+║ ██║     ██║     ██║   ██║██║   ██║██║  ██║   ██║   █████╗  █████╔╝  ║
+║ ██║     ██║     ██║   ██║██║   ██║██║  ██║   ██║   ██╔══╝  ██╔═██╗  ║
+║ ╚██████╗███████╗╚██████╔╝╚██████╔╝██████╔╝   ██║   ███████╗██║  ██╗ ║
+║  ╚═════╝╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═╝ ║
+║                                                                   ║{RESET}
+{MAGENTA}║                ▓▓▓ CLOUDTEK TERMINAL v1.0 ▓▓▓                    ║{RESET}
+{CYAN}║            Multi-Cloud Command & Control System                   ║{RESET}
+{GREEN}╚═════════════════════════════════════════════════════════════════╝{RESET}
+"""
 
-class Dashboard(Container):
-    """Main dashboard showing provider cards"""
-    
-    def compose(self) -> ComposeResult:
-        creds_status = check_credentials()
-        
-        yield Static("[bold cyan]cloudtek-tui[/bold cyan] - Multi-Cloud Management", id="title")
-        yield Static("")
-        
-        aws_status = "Configured" if creds_status['aws'] else "Not Configured"
-        gcp_status = "Configured" if creds_status['gcp'] else "Not Configured"
-        azure_status = "Configured" if creds_status['azure'] else "Not Configured"
-        
-        yield Static("[bold]Cloud Providers:[/bold]")
-        with Horizontal(id="provider-grid"):
-            yield ProviderCard("AWS", aws_status, id="aws-card", classes="provider-card")
-            yield ProviderCard("GCP", gcp_status, id="gcp-card", classes="provider-card")
-            yield ProviderCard("Azure", azure_status, id="azure-card", classes="provider-card")
-        
-        yield Static("")
-        yield Static("[bold]Security & Compliance:[/bold]")
-        with Horizontal(id="security-grid"):
-            yield ProviderCard("Cloud Custodian", "Ready", id="custodian-card", classes="tool-card")
-        
-        yield Static("")
-        yield Static("[bold]IaC & Automation:[/bold]")
-        with Horizontal(id="iac-grid"):
-            yield ProviderCard("Ansible", "Ready", id="ansible-card", classes="tool-card")
-            yield ProviderCard("Pulumi", "Ready", id="pulumi-card", classes="tool-card")
-        
-        yield Static("")
-        yield Static("[bold]Quick Actions:[/bold]")
-        yield Static("  [1] AWS  [2] GCP  [3] Azure")
-        yield Static("  [4] Cloud Custodian  [5] Ansible  [6] Pulumi")
-        yield Static("  [s] Setup  [?] Help  [q] Quit")
-
-class CloudTekTUI(App):
-    """Main TUI application"""
-    
-    CSS = """
-    Screen {
-        background: $surface;
-    }
-    
-    #title {
-        text-align: center;
-        padding: 1;
-        background: $primary;
-    }
-    
-    #provider-grid {
-        height: auto;
-        padding: 1;
-        align: center middle;
-    }
-    
-    .provider-card {
-        width: 30;
-        height: 5;
-        border: solid $accent;
-        padding: 1;
-        margin: 1;
-        background: $panel;
-    }
-    
-    .provider-card:hover {
-        border: solid $success;
-        background: $boost;
-    }
-    
-    .tool-card {
-        width: 30;
-        height: 5;
-        border: solid $primary;
-        padding: 1;
-        margin: 1;
-        background: $panel;
-    }
-    
-    .tool-card:hover {
-        border: solid $warning;
-        background: $boost;
-    }
-    """
-    
-    BINDINGS = [
-        Binding("q", "quit", "Quit"),
-        Binding("1", "show_aws", "AWS"),
-        Binding("2", "show_gcp", "GCP"),
-        Binding("3", "show_azure", "Azure"),
-        Binding("4", "show_custodian", "Custodian"),
-        Binding("5", "show_ansible", "Ansible"),
-        Binding("6", "show_pulumi", "Pulumi"),
-        Binding("s", "setup", "Setup"),
-        Binding("?", "help", "Help"),
-    ]
-    
-    def __init__(self):
-        super().__init__()
-        self.config = self.load_config()
-    
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Dashboard()
-        yield Footer()
-    
-    def load_config(self) -> dict:
-        """Load or create default configuration"""
-        if not CONFIG_FILE.exists():
-            default_config = {
-                "default_provider": "aws",
-                "default_regions": {
-                    "aws": "us-east-1",
-                    "gcp": "us-central1",
-                    "azure": "eastus"
-                },
-                "aws": {
-                    "profile": "default",
-                    "regions": ["us-east-1", "us-west-2"]
-                },
-                "gcp": {
-                    "project": "",
-                    "regions": ["us-central1", "europe-west1"]
-                },
-                "azure": {
-                    "subscription_id": "",
-                    "regions": ["eastus", "westus2"]
-                },
-                "ui": {
-                    "theme": "dark",
-                    "refresh_interval": 30
-                }
-            }
-            APP_DIR.mkdir(parents=True, exist_ok=True)
-            AWS_CREDS_DIR.mkdir(parents=True, exist_ok=True)
-            GCP_CREDS_DIR.mkdir(parents=True, exist_ok=True)
-            AZURE_CREDS_DIR.mkdir(parents=True, exist_ok=True)
-            
-            with open(CONFIG_FILE, 'w') as f:
-                yaml.dump(default_config, f, default_flow_style=False)
-            return default_config
-        
-        return yaml.safe_load(CONFIG_FILE.read_text())
-    
-    def action_show_aws(self) -> None:
-        """Show AWS resources screen"""
-        self.notify("AWS Resources - Coming soon!")
-    
-    def action_show_gcp(self) -> None:
-        """Show GCP resources screen"""
-        self.notify("GCP Resources - Coming soon!")
-    
-    def action_show_azure(self) -> None:
-        """Show Azure resources screen"""
-        self.notify("Azure Resources - Coming soon!")
-    
-    def action_show_custodian(self) -> None:
-        """Show Cloud Custodian policy management"""
-        self.notify("Cloud Custodian - Policy-as-code (uses AWS/GCP/Azure creds)")
-    
-    def action_show_ansible(self) -> None:
-        """Show Ansible automation"""
-        self.notify("Ansible - Automation & configuration management")
-    
-    def action_show_pulumi(self) -> None:
-        """Show Pulumi IaC management"""
-        self.notify("Pulumi - Pure Python Infrastructure as Code (local, no account required)")
-    
-    def action_setup(self) -> None:
-        """Show credential setup wizard"""
-        setup_text = """
-[bold]Credential Setup[/bold]
-
-[bold cyan]Custom Credential Storage:[/bold cyan]
-Credentials stored in: ~/.decyphertek.ai/app-store/cloudtek-tui/
-
-[bold cyan]Setup Instructions:[/bold cyan]
-
-[bold]AWS:[/bold]
-Edit: ~/.decyphertek.ai/app-store/cloudtek-tui/aws/credentials
-[default]
-aws_access_key_id = YOUR_ACCESS_KEY
-aws_secret_access_key = YOUR_SECRET_KEY
-
-[bold]GCP:[/bold]
-Place service account JSON at:
-~/.decyphertek.ai/app-store/cloudtek-tui/gcp/application_default_credentials.json
-
-[bold]Azure:[/bold]
-Create: ~/.decyphertek.ai/app-store/cloudtek-tui/azure/credentials.json
-{
-  "tenant_id": "xxx",
-  "client_id": "xxx",
-  "client_secret": "xxx",
-  "subscription_id": "xxx"
+COMMAND_MAP = {
+    "aws": "aws",
+    "gcp": "gcloud",
+    "azure": "az",
+    "custodian": "c7n",
+    "pulumi": "pulumi",
+    "ansible": "ansible"
 }
 
-Restart cloudtek-tui after adding credentials.
-        """
-        self.notify(setup_text, timeout=15)
+# Simplified command aliases
+SIMPLIFIED_COMMANDS = {
+    # AWS simplified commands
+    "aws list instances": "aws ec2 describe-instances",
+    "aws list buckets": "aws s3 ls",
+    "aws list users": "aws iam list-users",
+    "aws list roles": "aws iam list-roles",
+    "aws list functions": "aws lambda list-functions",
+    "aws list databases": "aws rds describe-db-instances",
+    "aws start instance": "aws ec2 start-instances --instance-ids",
+    "aws stop instance": "aws ec2 stop-instances --instance-ids",
+    "aws create bucket": "aws s3 mb s3://",
+    "aws delete bucket": "aws s3 rb s3://",
     
-    def action_help(self) -> None:
-        """Show help information"""
-        help_text = """
-[bold]cloudtek-tui Help[/bold]
+    # GCP simplified commands
+    "gcp list instances": "gcloud compute instances list",
+    "gcp list buckets": "gsutil ls",
+    "gcp list functions": "gcloud functions list",
+    "gcp list databases": "gcloud sql instances list",
+    "gcp start instance": "gcloud compute instances start",
+    "gcp stop instance": "gcloud compute instances stop",
+    "gcp create bucket": "gsutil mb gs://",
+    "gcp delete bucket": "gsutil rb gs://",
+    
+    # Azure simplified commands
+    "azure list vms": "az vm list",
+    "azure list storage": "az storage account list",
+    "azure list functions": "az functionapp list",
+    "azure list databases": "az sql server list",
+    "azure start vm": "az vm start --name",
+    "azure stop vm": "az vm stop --name",
+    "azure create storage": "az storage account create --name",
+    "azure delete storage": "az storage account delete --name",
+}
 
-[bold cyan]Keyboard Shortcuts:[/bold cyan]
-  1 - AWS Resources
-  2 - GCP Resources
-  3 - Azure Resources
-  4 - Cloud Custodian (Policy)
-  5 - Ansible (Automation)
-  6 - Pulumi (IaC)
-  s - Setup Credentials
-  ? - This help screen
-  q - Quit application
+def setup_credentials():
+    APP_DIR.mkdir(parents=True, exist_ok=True)
+    AWS_CREDS_DIR.mkdir(parents=True, exist_ok=True)
+    GCP_CREDS_DIR.mkdir(parents=True, exist_ok=True)
+    AZURE_CREDS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = str(AWS_CREDS_DIR / "credentials")
+    os.environ['AWS_CONFIG_FILE'] = str(AWS_CREDS_DIR / "config")
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(GCP_CREDS_DIR / "application_default_credentials.json")
 
-[bold cyan]Configuration:[/bold cyan]
-  Config: ~/.decyphertek.ai/app-store/cloudtek-tui/config.yaml
-  AWS:    ~/.decyphertek.ai/app-store/cloudtek-tui/aws/
-  GCP:    ~/.decyphertek.ai/app-store/cloudtek-tui/gcp/
-  Azure:  ~/.decyphertek.ai/app-store/cloudtek-tui/azure/
+def first_run_setup():
+    import shutil
+    from getpass import getpass
+    
+    print(f"\n{CYAN}═══ FIRST RUN SETUP ═══{RESET}\n")
+    print(f"{YELLOW}Credential storage: {APP_DIR}{RESET}\n")
+    
+    # AWS Setup
+    print(f"{GREEN}AWS Credentials Setup:{RESET}")
+    aws_key = input(f"{CYAN}AWS Access Key ID:{RESET} ").strip()
+    aws_secret = getpass(f"{CYAN}AWS Secret Access Key:{RESET} ").strip()
+    aws_region = input(f"{CYAN}Default Region [us-east-1]:{RESET} ").strip() or "us-east-1"
+    
+    if aws_key and aws_secret:
+        aws_creds_file = AWS_CREDS_DIR / "credentials"
+        aws_config_file = AWS_CREDS_DIR / "config"
+        
+        with open(aws_creds_file, 'w') as f:
+            f.write(f"[default]\n")
+            f.write(f"aws_access_key_id = {aws_key}\n")
+            f.write(f"aws_secret_access_key = {aws_secret}\n")
+        
+        with open(aws_config_file, 'w') as f:
+            f.write(f"[default]\n")
+            f.write(f"region = {aws_region}\n")
+        
+        print(f"{GREEN}✓ AWS credentials saved{RESET}")
+    else:
+        print(f"{YELLOW}⚠ Skipped AWS setup{RESET}")
+    
+    # GCP Setup
+    print(f"\n{GREEN}GCP Credentials Setup:{RESET}")
+    gcp_json_path = input(f"{CYAN}Path to GCP service account JSON (or press Enter to skip):{RESET} ").strip()
+    
+    if gcp_json_path and Path(gcp_json_path).exists():
+        gcp_dest = GCP_CREDS_DIR / "application_default_credentials.json"
+        shutil.copy(gcp_json_path, gcp_dest)
+        print(f"{GREEN}✓ GCP credentials saved{RESET}")
+    else:
+        print(f"{YELLOW}⚠ Skipped GCP setup{RESET}")
+    
+    # Azure Setup
+    print(f"\n{GREEN}Azure Credentials Setup:{RESET}")
+    azure_setup = input(f"{CYAN}Run 'az login' now? (y/n):{RESET} ").strip().lower()
+    
+    if azure_setup == 'y':
+        print(f"{YELLOW}Running: az login{RESET}")
+        subprocess.run("az login", shell=True)
+        print(f"{GREEN}✓ Azure login complete{RESET}")
+    else:
+        print(f"{YELLOW}⚠ Skipped Azure setup - run 'az login' manually later{RESET}")
+    
+    print(f"\n{GREEN}Setup complete!{RESET}\n")
 
-[bold cyan]Features:[/bold cyan]
-  - Pure Python implementation (no CLI dependencies)
-  - Isolated credential storage
-  - Multi-cloud resource management
-  - Policy enforcement (Cloud Custodian)
-  - Automation (Ansible)
-  - Infrastructure as Code (Pulumi - pure Python, local)
-        """
-        self.notify(help_text, timeout=10)
+def show_help():
+    print(f"\n{CYAN}═══ CLOUDTEK SIMPLIFIED COMMANDS ═══{RESET}")
+    print(f"\n{GREEN}AWS Commands:{RESET}")
+    print(f"  aws list instances  - List EC2 instances")
+    print(f"  aws list buckets    - List S3 buckets")
+    print(f"  aws list users      - List IAM users")
+    print(f"  aws list functions  - List Lambda functions")
+    print(f"  aws list databases  - List RDS databases")
+    print(f"\n{GREEN}GCP Commands:{RESET}")
+    print(f"  gcp list instances  - List Compute instances")
+    print(f"  gcp list buckets    - List Cloud Storage buckets")
+    print(f"  gcp list functions  - List Cloud Functions")
+    print(f"  gcp list databases  - List Cloud SQL databases")
+    print(f"\n{GREEN}Azure Commands:{RESET}")
+    print(f"  azure list vms      - List Virtual Machines")
+    print(f"  azure list storage  - List Storage accounts")
+    print(f"  azure list functions - List Function apps")
+    print(f"  azure list databases - List SQL servers")
+    print(f"\n{GREEN}Tools:{RESET}")
+    print(f"  custodian <command> - Cloud Custodian")
+    print(f"  pulumi <command>    - Pulumi IaC")
+    print(f"  ansible <command>   - Ansible")
+    print(f"\n{GREEN}System:{RESET}")
+    print(f"  help  - Show this help")
+    print(f"  exit  - Exit CloudTek")
+    print(f"\n{YELLOW}All other commands pass through like a normal terminal{RESET}\n")
+
+def execute_command(cmd):
+    # Check for simplified commands first
+    cmd_lower = cmd.lower().strip()
+    
+    # Try to match simplified command patterns
+    actual_cmd = None
+    for simple_cmd, real_cmd in SIMPLIFIED_COMMANDS.items():
+        if cmd_lower.startswith(simple_cmd):
+            # Extract any additional arguments after the simplified command
+            extra_args = cmd[len(simple_cmd):].strip()
+            actual_cmd = f"{real_cmd} {extra_args}".strip()
+            break
+    
+    # If no simplified command matched, check for base command aliases
+    if not actual_cmd:
+        parts = cmd.split(maxsplit=1)
+        if not parts:
+            return
+        
+        base_cmd = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
+        
+        if base_cmd in COMMAND_MAP:
+            actual_cmd = f"{COMMAND_MAP[base_cmd]} {args}"
+        else:
+            # Pass through all other commands
+            actual_cmd = cmd
+    
+    try:
+        result = subprocess.run(actual_cmd, shell=True, capture_output=True, text=True, timeout=30)
+        if result.stdout:
+            # Try to format as YAML for cloud commands
+            if any(cmd_lower.startswith(prefix) for prefix in ["aws", "gcp", "azure", "custodian"]):
+                try:
+                    data = json.loads(result.stdout)
+                    print(f"{GREEN}{yaml.dump(data, default_flow_style=False, sort_keys=False)}{RESET}")
+                except:
+                    print(result.stdout)
+            else:
+                print(result.stdout)
+        if result.stderr:
+            print(f"{RED}{result.stderr}{RESET}")
+    except subprocess.TimeoutExpired:
+        print(f"{RED}Command timed out{RESET}")
+    except Exception as e:
+        print(f"{RED}Error: {e}{RESET}")
 
 def main():
-    """Entry point"""
-    try:
-        app = CloudTekTUI()
-        app.run()
-    except KeyboardInterrupt:
-        print("\n[cloudtek-tui] Exiting...")
-        sys.exit(0)
-    except Exception as e:
-        print(f"[cloudtek-tui] Error: {e}")
-        sys.exit(1)
+    setup_credentials()
+    print(BANNER)
+    
+    if not (AWS_CREDS_DIR / "credentials").exists():
+        first_run_setup()
+    
+    print(f"{GREEN}CloudTek initialized. Type 'help' for commands.{RESET}\n")
+    
+    while True:
+        try:
+            cmd = input(f"{CYAN}cloudtek>{RESET} ").strip()
+            if not cmd:
+                continue
+            if cmd == "exit":
+                print(f"{GREEN}Goodbye!{RESET}")
+                break
+            elif cmd == "help":
+                show_help()
+            else:
+                execute_command(cmd)
+        except KeyboardInterrupt:
+            print(f"\n{GREEN}Goodbye!{RESET}")
+            break
+        except EOFError:
+            break
 
 if __name__ == "__main__":
     main()
+

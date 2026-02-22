@@ -18,7 +18,7 @@ echo "Installing dependencies with uv (Python 3.13)..."
 uv venv --clear --python 3.13
 source .venv/bin/activate
 uv pip install setuptools wheel
-uv pip install textual pyyaml awscli azure-cli c7n ansible-core pulumi pyinstaller
+uv pip install pyyaml awscli google-cloud-compute google-cloud-storage azure-identity azure-mgmt-compute azure-mgmt-storage azure-mgmt-network azure-mgmt-resource c7n ansible-core pulumi pyinstaller
 
 echo ""
 echo "Cleaning previous build..."
@@ -29,13 +29,24 @@ echo "Building executable with PyInstaller..."
 pyinstaller --onefile \
     --name cloudtek-tui.app \
     --clean \
-    --hidden-import awscli \
-    --hidden-import azure.cli \
-    --hidden-import c7n \
-    --hidden-import ansible \
-    --collect-all textual \
-    --collect-all rich \
-    --copy-metadata rich \
+    --collect-all awscli \
+    --collect-all google.cloud \
+    --collect-all azure.mgmt \
+    --collect-all azure.identity \
+    --collect-all c7n \
+    --collect-all ansible \
+    --collect-all pulumi \
+    --copy-metadata awscli \
+    --copy-metadata google-cloud-compute \
+    --copy-metadata google-cloud-storage \
+    --copy-metadata azure-identity \
+    --copy-metadata azure-mgmt-compute \
+    --copy-metadata azure-mgmt-storage \
+    --copy-metadata azure-mgmt-network \
+    --copy-metadata azure-mgmt-resource \
+    --copy-metadata c7n \
+    --copy-metadata ansible-core \
+    --copy-metadata pulumi \
     cloudtek_tui.py
 
 echo ""
