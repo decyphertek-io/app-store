@@ -2,7 +2,7 @@
 
 STORY = """
 2184. You are Chase, ex-Multitek security specialist, burned for discovering 
-Project OUROBOROS - an AI designed for digital immortality.
+Project Globaltarian - an AI designed for parasitic digital authoritarians .
 
 Now a polymorphic worm tears through the Globaltarian Network. It has fractured itself into a fractal of programs. 
 
