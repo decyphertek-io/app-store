@@ -134,12 +134,20 @@ class GlobaltarianRPG(App):
         if self.state.api_key:
             log.write("[green]✓ AI GAME MASTER: ONLINE[/green]")
             log.write("[green]The story adapts to your choices...[/green]\n")
+            
+            # Trigger initial AI story event
+            log.write("[bold magenta]>>> The Guardian materializes...[/bold magenta]")
+            log.write("[cyan]Guardian: 'Chase. I've been waiting for you.'[/cyan]")
+            log.write("[cyan]Guardian: 'The Globaltarian AI is not what it seems.'[/cyan]")
+            log.write("[cyan]Guardian: 'Every choice you make teaches it. Every move feeds it.'[/cyan]")
+            log.write("[cyan]Guardian: 'Are you ready to face the truth?'[/cyan]\n")
+            log.write("[dim]Type 'event' to continue the story...[/dim]\n")
         else:
             log.write("[yellow]⚠ AI GAME MASTER: OFFLINE[/yellow]")
             log.write("[yellow]Type 'setup' to enable AI-driven storytelling[/yellow]\n")
         
         log.write(f"[bold green]>>> {NETWORK[self.state.location]['desc']}[/bold green]\n")
-        log.write("[dim]Type 'help' for commands | Type 'event' to trigger AI story events[/dim]")
+        log.write("[dim]Type 'help' for commands[/dim]")
         self.update_status()
         
     def update_status(self):
