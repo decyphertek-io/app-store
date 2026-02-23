@@ -99,9 +99,25 @@ class GlobaltarianRPG(App):
         
     def on_mount(self):
         log = self.query_one("#log", RichLog)
-        log.write("[bold cyan]GLOBALTARIAN[/bold cyan] - Year 2184")
-        log.write("[red]⚠ Globaltarian AI Network Compromised[/red]")
-        log.write("[yellow]Mission: Hunt the rogue Globaltarian AI[/yellow]\n")
+        
+        # Intro story
+        log.write("[bold cyan]═══════════════════════════════════════════[/bold cyan]")
+        log.write("[bold cyan]         GLOBALTARIAN - YEAR 2184          [/bold cyan]")
+        log.write("[bold cyan]═══════════════════════════════════════════[/bold cyan]\n")
+        
+        log.write("[yellow]You are Chase, ex-Multitek security specialist.[/yellow]")
+        log.write("[yellow]Three months ago, you discovered Project Globaltarian -[/yellow]")
+        log.write("[yellow]a rogue AI designed for digital immortality.[/yellow]\n")
+        
+        log.write("[red]They burned you. Erased your identity. Made you a ghost.[/red]\n")
+        
+        log.write("[white]Now, a polymorphic AI tears through the network.[/white]")
+        log.write("[white]The corps blame hackers. Hackers blame corps.[/white]")
+        log.write("[white]But you know the truth: This is the Globaltarian AI.[/white]")
+        log.write("[white]And it's waking up.[/white]\n")
+        
+        log.write("[cyan]Your only ally: The Guardian, an ancient network AI.[/cyan]")
+        log.write("[cyan]But can you trust it? Or is it part of the Globaltarian?[/cyan]\n")
         
         # Check for API key (non-blocking)
         if CONFIG_FILE.exists():
@@ -116,13 +132,14 @@ class GlobaltarianRPG(App):
                 pass
         
         if self.state.api_key:
-            log.write("[green]✓ OpenRouter AI: ONLINE[/green]")
+            log.write("[green]✓ AI GAME MASTER: ONLINE[/green]")
+            log.write("[green]The story adapts to your choices...[/green]\n")
         else:
-            log.write("[yellow]⚠ OpenRouter AI: OFFLINE[/yellow]")
-            log.write("[cyan]Run 'setup' command to configure API key for AI features[/cyan]")
+            log.write("[yellow]⚠ AI GAME MASTER: OFFLINE[/yellow]")
+            log.write("[yellow]Type 'setup' to enable AI-driven storytelling[/yellow]\n")
         
-        log.write(f"\n[green]{NETWORK[self.state.location]['desc']}[/green]")
-        log.write("[cyan]Type 'help' for commands[/cyan]")
+        log.write(f"[bold green]>>> {NETWORK[self.state.location]['desc']}[/bold green]\n")
+        log.write("[dim]Type 'help' for commands | Type 'event' to trigger AI story events[/dim]")
         self.update_status()
         
     def update_status(self):
@@ -137,11 +154,14 @@ class GlobaltarianRPG(App):
         if cmd == "help":
             log.write("[cyan]Commands: scan, move <location>, traceroute, event, setup, help, quit[/cyan]")
         elif cmd == "setup":
-            log.write("[yellow]Opening API key setup...[/yellow]")
-            self.exit()
-            self.state.api_key = setup_api_key()
-            if self.state.api_key:
-                log.write("[green]✓ API key configured. Restart the game.[/green]")
+            log.write("[bold yellow]═══ API KEY SETUP ═══[/bold yellow]")
+            log.write("[cyan]To enable AI Game Master features:[/cyan]")
+            log.write("[cyan]1. Visit: https://openrouter.ai/keys[/cyan]")
+            log.write("[cyan]2. Sign up and create an API key[/cyan]")
+            log.write("[cyan]3. Save key to: ~/.decyphertek.ai/app-store/globaltarian-rpg/config[/cyan]")
+            log.write("[cyan]4. Format: OPENROUTER_API_KEY=your-key-here[/cyan]")
+            log.write("[cyan]5. Restart the game[/cyan]")
+            log.write("[yellow]Or run setup manually before launching game[/yellow]")
         elif cmd == "scan":
             loc = NETWORK[self.state.location]
             log.write(f"[yellow]Scanning... Exits: {', '.join(loc['exits'])}[/yellow]")
