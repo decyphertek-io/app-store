@@ -4,7 +4,7 @@ A cyberpunk text-based RPG set in 2184 where you hunt a polymorphic AI worm thro
 
 ## Story
 
-Year 2184. The Multitek Universe. A polymorphic AI worm has self-populated through the network, rewriting reality as it spreads. You are Chase, a network security agent tasked with tracing the worm's path and neutralizing it before it takes complete control.
+Year 2184. The Multitek Universe. A polymorphic AI worm has self-populated through the network, rewriting reality as it spreads. You are Chase, a network security agent tasked with tracerouting the globaltarian path and neutralizing it before the global parasite is an octopus throughout the network. 
 
 ## Features
 
@@ -31,7 +31,7 @@ The build script uses UV to create a temporary venv, installs dependencies, buil
 
 - `scan` - Scan current location for worm signatures
 - `move <location>` - Move to connected network node
-- `traceroute` - Trace network paths to find worm locations
+- `traceroute` - Trace network paths to find globaltarian locations
 - `event` - Trigger AI event flow (requires OpenRouter API key)
 - `help` - Show available commands
 - `quit` - Exit game

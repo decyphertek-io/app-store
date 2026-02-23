@@ -1,8 +1,9 @@
-"""LangGraph Event Flow System - Golden Ratio Random/Deterministic Balance"""
+"""LangGraph Event Flow System - Fractal Storytelling"""
 import random
 from typing import Dict, List, TypedDict
 from langgraph.graph import StateGraph, END
-from agents import AGENTS, GOLDEN_RATIO
+from agents_v2 import AGENTS, GOLDEN_RATIO
+from story_engine import STORY
 
 class GameStateGraph(TypedDict):
     location: str
@@ -14,7 +15,7 @@ class GameStateGraph(TypedDict):
     agent_responses: List[str]
 
 def trigger_random_event(state: GameStateGraph) -> GameStateGraph:
-    """Randomly select an agent to generate an event"""
+    """Agent generates scene - feeds into fractal story"""
     agent_name = random.choice(list(AGENTS.keys()))
     agent = AGENTS[agent_name]
     
@@ -25,12 +26,25 @@ def trigger_random_event(state: GameStateGraph) -> GameStateGraph:
         "location": state["location"]
     }
     
-    event = agent.generate_event(context)
-    event["source"] = agent_name
+    # Get narrative threads for context
+    story_threads = STORY.narrative_threads[-5:]
     
-    state["current_event"] = event
-    state["events_history"].append(event)
-    state["threat_level"] += event.get("threat", 0)
+    # Agent generates scene
+    scene = agent.generate_scene(context, story_threads)
+    scene["source"] = agent_name
+    scene["agent"] = agent.name
+    
+    # Parse scene into story engine (creates fractal connections)
+    narrative_thread = STORY.parse_interaction(scene, list(AGENTS.values()))
+    
+    # If scene has new location, create it
+    if scene.get("location") and scene["location"] not in ["memory_vault", "quantum_bridge"]:
+        new_loc = agent.create_location(scene["desc"])
+        scene["location_details"] = new_loc
+    
+    state["current_event"] = scene
+    state["events_history"].append(scene)
+    state["threat_level"] += scene.get("threat", 0)
     
     return state
 
