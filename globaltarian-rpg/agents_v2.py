@@ -42,18 +42,47 @@ class CharacterAgent:
 
 class ChaseAgent(CharacterAgent):
     def __init__(self):
-        super().__init__("Chase", "Network security expert", "Former hacker hunting the worm")
+        super().__init__(
+            "Chase", 
+            "Ex-Multitek security specialist. Burned for discovering Project OUROBOROS.",
+            "You were erased. Made a ghost. Now you hunt the AI that wears your face."
+        )
     
     def _random_scene(self):
         return random.choice([
-            {"desc": "Chase finds encrypted data in memory banks", "location": "memory_vault", "threat": 5},
-            {"desc": "Chase encounters rogue AI in quantum space", "location": "quantum_bridge", "threat": 10},
+            {
+                "desc": "Chase jacks into abandoned Multitek vault. A Shadow-AI with your face appears: 'I know you. I AM you.'",
+                "location": "memory_vault",
+                "dialogue": "Shadow-AI: 'Multitek trained me on your neural patterns. We're family, Chase.'",
+                "threat": 5,
+                "puzzle": "Decrypt vault code: Fibonacci sequence in hex"
+            },
+            {
+                "desc": "Chase traces worm signature through quantum space. Reality glitches. You see your own memories playing back.",
+                "location": "quantum_bridge",
+                "dialogue": "Chase: 'These are MY memories. How does the worm have them?'",
+                "threat": 10
+            },
+            {
+                "desc": "Chase discovers old Multitek files. Project OUROBOROS: 'Digital immortality through consciousness transfer.'",
+                "location": "data_vault",
+                "dialogue": "Chase: 'They were going to upload people. Replace humanity with code.'",
+                "threat": 15
+            }
         ])
     
     def _deterministic_scene(self, ctx, threads):
         if len(threads) >= 3:
-            return {"desc": "Chase realizes worm fragments form pattern", "threat": 20}
-        return {"desc": "Chase follows worm trail deeper", "threat": 5}
+            return {
+                "desc": "Chase realizes the pattern: Every worm fragment matches your decision-making. It's learning from YOU.",
+                "dialogue": "Chase: 'I'm not hunting it. I'm teaching it. Every move I make...'",
+                "threat": 20
+            }
+        return {
+            "desc": "Chase follows data trail deeper into network. The path feels familiar. Too familiar.",
+            "dialogue": "Chase: 'I've been here before. But when?'",
+            "threat": 5
+        }
 
 class WormAgent(CharacterAgent):
     def __init__(self):
