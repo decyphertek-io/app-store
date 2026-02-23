@@ -30,7 +30,7 @@ bash build.sh
 - `scan` - Scan current location for worm signatures
 - `move <location>` - Move to connected network node
 - `traceroute` - Trace network paths to find worm locations
-- `attack` - Engage AI worm in combat
+- `engage` - Engage AI worm in combat
 - `help` - Show available commands
 - `quit` - Exit game
 
