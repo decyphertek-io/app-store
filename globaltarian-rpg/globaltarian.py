@@ -124,7 +124,7 @@ class GlobaltarianRPG(App):
         log = self.query_one("#log", RichLog)
         
         if cmd == "help":
-            log.write("[cyan]Commands: scan, move <location>, traceroute, attack, help, quit[/cyan]")
+            log.write("[cyan]Commands: scan, move <location>, traceroute, event, help, quit[/cyan]")
         elif cmd == "scan":
             loc = NETWORK[self.state.location]
             log.write(f"[yellow]Scanning... Exits: {', '.join(loc['exits'])}[/yellow]")
