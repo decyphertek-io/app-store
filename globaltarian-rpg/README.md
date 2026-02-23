@@ -15,22 +15,24 @@ Year 2184. The Multitek Universe. A polymorphic AI worm has self-populated throu
 - **Network Traceroute**: Puzzle mechanics to find the worm
 - **Cyberpunk Theme**: Neuromancer/Terminator/Orwell inspired
 
-## Installation
+## Build & Run
 
 ```bash
-# Build the game
+# Build executable with UV + PyInstaller
 bash build.sh
 
-# Run the game
+# Run the built executable
 ./dist/globaltarian-rpg.app
 ```
+
+The build script uses UV to create a temporary venv, installs dependencies, builds with PyInstaller, then tears down the environment - leaving only the standalone executable.
 
 ## Commands
 
 - `scan` - Scan current location for worm signatures
 - `move <location>` - Move to connected network node
 - `traceroute` - Trace network paths to find worm locations
-- `engage` - Engage AI worm in combat
+- `event` - Trigger AI event flow (requires OpenRouter API key)
 - `help` - Show available commands
 - `quit` - Exit game
 
