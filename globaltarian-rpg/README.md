@@ -4,7 +4,7 @@ A cyberpunk text-based RPG set in 2184 where you hunt a polymorphic AI worm thro
 
 ## Story
 
-Year 2184. The Multitek Universe. A polymorphic AI worm has self-populated through the network, rewriting reality as it spreads. You are Chase, a network security agent tasked with tracerouting the globaltarian path and neutralizing it before the global parasite is an octopus throughout the network. 
+Year 2184. The Multitek Universe. A polymorphic AI worm has self-populated through the network, rewriting reality as it spreads. You are Chase, a network security engineer tasked with tracerouting the globaltarian path and neutralizing it before the global parasite is an octopus throughout the network. 
 
 ## Features
 
