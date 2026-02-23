@@ -1,15 +1,21 @@
-"""LangChain AI Character Agents for GLOBALTARIAN"""
+"""LangChain AI Character Agents for GLOBALTARIAN - Fractal Storytelling"""
 import os
 import random
 from typing import Dict, List
 from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema import SystemMessage, HumanMessage
 
 GOLDEN_RATIO = 0.618  # 62% random, 38% deterministic
 
 class CharacterAgent:
-    def __init__(self, name: str, personality: str):
+    def __init__(self, name: str, personality: str, backstory: str):
         self.name = name
         self.personality = personality
+        self.backstory = backstory
+        self.narrative_memory = []  # Tracks story threads
+        self.created_locations = []
+        
         api_key = os.getenv("OPENROUTER_API_KEY")
         self.llm = ChatOpenAI(
             model="openai/gpt-3.5-turbo",
@@ -17,15 +23,38 @@ class CharacterAgent:
             openai_api_base="https://openrouter.ai/api/v1"
         ) if api_key else None
     
-    def generate_event(self, context: Dict) -> Dict:
+    def generate_scene(self, context: Dict, story_threads: List[str]) -> Dict:
+        """Generate a scene with location, characters, and narrative"""
         if random.random() < GOLDEN_RATIO:
-            return self._random_event()
-        return self._deterministic_event(context)
+            return self._random_scene(context, story_threads)
+        return self._deterministic_scene(context, story_threads)
     
-    def _random_event(self) -> Dict:
+    def create_location(self, narrative_context: str) -> Dict:
+        """AI generates a new network location based on narrative"""
+        if not self.llm:
+            return {"name": "unknown_sector", "desc": "Uncharted network space"}
+        
+        prompt = ChatPromptTemplate.from_messages([
+            SystemMessage(content=f"You are {self.name}. {self.personality}. Create a cyberpunk network location."),
+            HumanMessage(content=f"Based on this story context: {narrative_context}. Generate a network sector name and atmospheric description (2 sentences max).")
+        ])
+        
+        try:
+            response = self.llm.invoke(prompt.format_messages())
+            location = {
+                "name": f"sector_{len(self.created_locations)}",
+                "desc": response.content,
+                "created_by": self.name
+            }
+            self.created_locations.append(location)
+            return location
+        except:
+            return {"name": "glitch_sector", "desc": "Reality fragments here. Data corrupts."}
+    
+    def _random_scene(self, context: Dict, threads: List[str]) -> Dict:
         raise NotImplementedError
     
-    def _deterministic_event(self, context: Dict) -> Dict:
+    def _deterministic_scene(self, context: Dict, threads: List[str]) -> Dict:
         raise NotImplementedError
 
 class ChaseAgent(CharacterAgent):
