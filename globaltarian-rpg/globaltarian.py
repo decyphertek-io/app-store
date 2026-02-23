@@ -144,6 +144,27 @@ class GlobaltarianRPG(App):
             for node in NETWORK:
                 if NETWORK[node].get("worm"):
                     log.write(f"[red]Worm detected at: {node}[/red]")
+        elif cmd == "event":
+            if self.state.api_key:
+                log.write("[cyan]>>> AI Event Flow Triggered...[/cyan]")
+                try:
+                    from event_flow import run_event_cycle
+                    result = run_event_cycle({
+                        "location": self.state.location,
+                        "health": self.state.health,
+                        "threat_level": self.state.threat,
+                        "worms_found": 0
+                    })
+                    evt = result.get("current_event", {})
+                    log.write(f"[yellow]{evt.get('desc', 'Unknown event')}[/yellow]")
+                    for resp in result.get("agent_responses", []):
+                        log.write(f"[cyan]{resp}[/cyan]")
+                    self.state.health = result.get("health", self.state.health)
+                    self.state.threat = result.get("threat_level", self.state.threat)
+                except Exception as e:
+                    log.write(f"[red]Error: {str(e)}[/red]")
+            else:
+                log.write("[yellow]AI offline - API key required[/yellow]")
         elif cmd == "quit":
             self.exit()
         else:
