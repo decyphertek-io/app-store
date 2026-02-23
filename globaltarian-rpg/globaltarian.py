@@ -98,20 +98,31 @@ class GlobaltarianRPG(App):
         yield Footer()
         
     def on_mount(self):
-        # Load API key before starting game
-        self.state.api_key = load_api_key()
-        
         log = self.query_one("#log", RichLog)
         log.write("[bold cyan]GLOBALTARIAN[/bold cyan] - Year 2184")
-        log.write("[red]⚠ Polymorphic AI Worm Detected[/red]")
-        log.write("[yellow]Mission: Traceroute network and neutralize worm[/yellow]\n")
+        log.write("[red]⚠ Globaltarian AI Network Compromised[/red]")
+        log.write("[yellow]Mission: Hunt the rogue Globaltarian AI[/yellow]\n")
+        
+        # Check for API key (non-blocking)
+        if CONFIG_FILE.exists():
+            try:
+                with open(CONFIG_FILE, 'r') as f:
+                    for line in f:
+                        if line.startswith("OPENROUTER_API_KEY="):
+                            self.state.api_key = line.split("=", 1)[1].strip()
+                            os.environ['OPENROUTER_API_KEY'] = self.state.api_key
+                            break
+            except:
+                pass
         
         if self.state.api_key:
             log.write("[green]✓ OpenRouter AI: ONLINE[/green]")
         else:
-            log.write("[yellow]⚠ OpenRouter AI: OFFLINE (AI features disabled)[/yellow]")
+            log.write("[yellow]⚠ OpenRouter AI: OFFLINE[/yellow]")
+            log.write("[cyan]Run 'setup' command to configure API key for AI features[/cyan]")
         
         log.write(f"\n[green]{NETWORK[self.state.location]['desc']}[/green]")
+        log.write("[cyan]Type 'help' for commands[/cyan]")
         self.update_status()
         
     def update_status(self):
@@ -124,7 +135,13 @@ class GlobaltarianRPG(App):
         log = self.query_one("#log", RichLog)
         
         if cmd == "help":
-            log.write("[cyan]Commands: scan, move <location>, traceroute, event, help, quit[/cyan]")
+            log.write("[cyan]Commands: scan, move <location>, traceroute, event, setup, help, quit[/cyan]")
+        elif cmd == "setup":
+            log.write("[yellow]Opening API key setup...[/yellow]")
+            self.exit()
+            self.state.api_key = setup_api_key()
+            if self.state.api_key:
+                log.write("[green]✓ API key configured. Restart the game.[/green]")
         elif cmd == "scan":
             loc = NETWORK[self.state.location]
             log.write(f"[yellow]Scanning... Exits: {', '.join(loc['exits'])}[/yellow]")
