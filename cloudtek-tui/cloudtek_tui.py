@@ -32,7 +32,7 @@ BANNER = f"""{GREEN}
 ║  ╚═════╝╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═╝ ║
 ║                                                                   ║{RESET}
 {MAGENTA}║                ▓▓▓ CLOUDTEK TERMINAL v1.0 ▓▓▓                    ║{RESET}
-{CYAN}║            Multi-Cloud Command & Control System                   ║{RESET}
+{CYAN}║              Multi-Cloud Management System                        ║{RESET}
 {GREEN}╚═════════════════════════════════════════════════════════════════╝{RESET}
 """
 
@@ -100,6 +100,7 @@ def first_run_setup():
     # AWS Setup
     print(f"{GREEN}AWS Credentials Setup:{RESET}")
     aws_key = input(f"{CYAN}AWS Access Key ID:{RESET} ").strip()
+    print(f"{YELLOW}(Input hidden for security){RESET}")
     aws_secret = getpass(f"{CYAN}AWS Secret Access Key:{RESET} ").strip()
     aws_region = input(f"{CYAN}Default Region [us-east-1]:{RESET} ").strip() or "us-east-1"
     
