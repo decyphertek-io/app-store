@@ -113,9 +113,26 @@ def run_aider(cfg, extra_args, decyphertek_mode=False):
         os.environ[f"{key_prefix.upper()}_API_KEY"] = api_key
         full_model = model
 
+    print(f"""
+{Colors.CYAN}{Colors.BOLD}╔═══════════════════════════════════════════════════════════════╗
+║                   AIDER QUICK REFERENCE                       ║
+╚═══════════════════════════════════════════════════════════════╝{Colors.RESET}
+  {Colors.GREEN}/add <path>{Colors.RESET}     Add a file or directory to the chat
+  {Colors.GREEN}/drop <file>{Colors.RESET}    Remove a file from the chat
+  {Colors.GREEN}/ls{Colors.RESET}             List files currently in the chat
+  {Colors.GREEN}/diff{Colors.RESET}           Show changes made
+  {Colors.GREEN}/undo{Colors.RESET}           Undo last change
+  {Colors.GREEN}/run <cmd>{Colors.RESET}      Run a shell command
+  {Colors.GREEN}/clear{Colors.RESET}          Clear the chat history
+  {Colors.GREEN}/exit{Colors.RESET}           Quit aider
+
+  {Colors.YELLOW}Tip:{Colors.RESET} Use /add with full absolute paths, e.g:
+  {Colors.YELLOW}/add /home/user/Documents/git/my-repo/{Colors.RESET}
+""")
+
     from aider.main import main as aider_main
     aider_args = ["aider", "--model", full_model, "--api-key", f"{key_prefix}={api_key}",
-                  "--no-gitignore",
+                  "--no-gitignore", "--no-git",
                   "--chat-history-file", str(APP_STORE_DIR / ".aider.chat.history.md"),
                   "--input-history-file", str(APP_STORE_DIR / ".aider.input.history")]
     if decyphertek_mode:
