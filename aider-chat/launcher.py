@@ -130,6 +130,8 @@ def run_aider(cfg, extra_args, decyphertek_mode=False):
   {Colors.YELLOW}/add /home/user/Documents/git/my-repo/{Colors.RESET}
 """)
 
+    os.chdir(Path.home())
+
     from aider.main import main as aider_main
     aider_args = ["aider", "--model", full_model, "--api-key", f"{key_prefix}={api_key}",
                   "--no-gitignore", "--no-git",
