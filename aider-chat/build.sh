@@ -32,6 +32,8 @@ pyinstaller --onefile \
     --collect-all litellm \
     --collect-all tiktoken \
     --collect-all rich \
+    --collect-all tree_sitter_language_pack \
+    --collect-all grep_ast \
     --add-data ".venv/lib/python3.12/site-packages/tiktoken_ext:tiktoken_ext" \
     --collect-submodules aider \
     --collect-submodules tiktoken \
