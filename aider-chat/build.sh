@@ -31,6 +31,7 @@ pyinstaller --onefile \
     --collect-all aider \
     --collect-all litellm \
     --collect-all tiktoken \
+    --collect-all rich \
     --add-data ".venv/lib/python3.12/site-packages/tiktoken_ext:tiktoken_ext" \
     --collect-submodules aider \
     --collect-submodules tiktoken \

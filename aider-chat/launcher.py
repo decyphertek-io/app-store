@@ -134,7 +134,7 @@ def run_aider(cfg, extra_args, decyphertek_mode=False):
 
     from aider.main import main as aider_main
     aider_args = ["aider", "--model", full_model, "--api-key", f"{key_prefix}={api_key}",
-                  "--no-gitignore", "--no-git",
+                  "--no-gitignore", "--no-git", "--exclude-dirs", ".git",
                   "--chat-history-file", str(APP_STORE_DIR / ".aider.chat.history.md"),
                   "--input-history-file", str(APP_STORE_DIR / ".aider.input.history")]
     if decyphertek_mode:
