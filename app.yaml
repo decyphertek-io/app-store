@@ -15,7 +15,7 @@ apps:
     folder_path: argostranslate/
     executable: dist/argostranslate.app
     install_path: ~/.decyphertek.ai/app-store/argostranslate/
-    enabled: true
+    enabled: false
 
   ansible:
     id: ansible
