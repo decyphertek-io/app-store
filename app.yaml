@@ -4,8 +4,8 @@ apps:
     version: "1.0.0"
     repo_url: https://github.com/decyphertek-io/app-store
     folder_path: chromadb/
-    executable: dist/chromadb.app
-    release_url: https://github.com/decyphertek-io/app-store/releases/download/chromadb-v1.0.0/chromadb-app
+    executable: dist/chromadb.apps
+    release_url: https://github.com/decyphertek-io/app-store/releases/download/chromadb-v1.0.0/chromadb.apps
     config: cdb-config.yaml
     config_path: ~/.decyphertek.ai/configs/
     install_path: ~/.decyphertek.ai/app-store/chromadb/
@@ -16,7 +16,7 @@ apps:
     version: "1.0.0"
     repo_url: https://github.com/decyphertek-io/app-store
     folder_path: argostranslate/
-    executable: dist/argostranslate.app
+    executable: dist/argostranslate.apps
     release_url: https://github.com/decyphertek-io/app-store/releases/download/argostranslate-v1.0.0/argostranslate.app
     install_path: ~/.decyphertek.ai/app-store/argostranslate/
     enabled: false
