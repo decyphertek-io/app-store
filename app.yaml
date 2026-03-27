@@ -5,7 +5,7 @@ apps:
     repo_url: https://github.com/decyphertek-io/app-store
     folder_path: chromadb/
     executable: dist/chromadb.app
-    release_url: https://github.com/decyphertek-io/app-store/releases/download/chromadb-v1.0.0/chromadb.app
+    release_url: https://github.com/decyphertek-io/app-store/releases/download/chromadb-v1.0.0/chromadb
     config: cdb-config.yaml
     config_path: ~/.decyphertek.ai/configs/
     install_path: ~/.decyphertek.ai/app-store/chromadb/
