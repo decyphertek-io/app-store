@@ -1,0 +1,48 @@
+project: server-build-415714
+zone: us-east1-b
+machine_type: n2-standard-2
+disk_size: 50
+network: decyphertek
+subnetwork: decyphertek-subnet
+no_backups: true
+
+credentials_env: GCP_CREDENTIALS
+ssh_key_env: GCP_SSH_PRIVATE_KEY
+
+profiles:
+  debian:
+    ssh_user: adminotaur
+    tags:
+      - test-debian-vm
+  flatcar:
+    ssh_user: core
+    tags:
+      - test-flatcar-vm
+  kali:
+    ssh_user: kali
+    tags:
+      - test-kali-vm
+
+image_prefixes:
+  wazuh: wazuh-4x
+  opensearch: opensearch-3x
+  librechat: librechat
+  proxmox: proxmox
+  misp: misp
+  opencti: opencti
+  sonarqube: sonarqube
+  uptime-kuma: uptime-kuma
+  vaultwarden: vaultwarden
+  kali-wd: kali-wd
+
+service_profiles:
+  wazuh: debian
+  opensearch: debian
+  librechat: debian
+  proxmox: debian
+  misp: flatcar
+  opencti: flatcar
+  sonarqube: flatcar
+  uptime-kuma: flatcar
+  vaultwarden: flatcar
+  kali-wd: kali

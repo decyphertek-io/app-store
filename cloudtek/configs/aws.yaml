@@ -1,0 +1,40 @@
+region: us-east-1
+instance_type: t3.medium
+disk_size: 50
+vpc_id: vpc-6504011f
+security_group_id: sg-0e1723645d82979ae
+subnet_id: default
+no_backups: true
+
+credentials_env:
+  access_key: AWS_ACCESS_KEY_ID
+  secret_key: AWS_SECRET_ACCESS_KEY
+ssh_key_env: AWS_SSH_PRIVATE_KEY
+
+profiles:
+  debian:
+    ssh_user: adminotaur
+    tags:
+      - test-debian-vm
+  flatcar:
+    ssh_user: core
+    tags:
+      - test-flatcar-vm
+
+image_prefixes:
+  librechat: librechat
+  opensearch: opensearch-3x
+  misp: misp
+  nextcloud: nextcloud
+  opencti: opencti
+  uptime-kuma: uptime-kuma
+  vaultwarden: vaultwarden
+
+service_profiles:
+  librechat: debian
+  opensearch: debian
+  misp: flatcar
+  nextcloud: debian
+  opencti: flatcar
+  uptime-kuma: flatcar
+  vaultwarden: flatcar

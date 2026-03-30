@@ -1,0 +1,78 @@
+name: Build Argos Translate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'argostranslate/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get next version
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST=$(gh release list --repo ${{ github.repository }} --limit 50 \
+            | grep "^argostranslate-v" | awk '{print $1}' | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then
+            NEXT="argostranslate-v1.0.0"
+          else
+            PATCH=$(echo $LATEST | awk -F. '{print $NF}')
+            BASE=$(echo $LATEST | awk -F. '{OFS="."; $NF=""; NF--; print}')
+            NEXT="${BASE}.$((PATCH+1))"
+          fi
+          echo "tag=$NEXT" >> $GITHUB_OUTPUT
+          echo "old=$LATEST" >> $GITHUB_OUTPUT
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Build
+        working-directory: ./argostranslate
+        run: |
+          set -e
+          uv venv --clear --python 3.12
+          source .venv/bin/activate
+          uv pip install argostranslate pyinstaller
+          rm -rf dist build *.spec
+          pyinstaller --onefile \
+            --name argostranslate.apps \
+            --clean \
+            --collect-all argostranslate \
+            --hidden-import argostranslate.package \
+            --hidden-import argostranslate.translate \
+            --hidden-import ctranslate2 \
+            --hidden-import sentencepiece \
+            --hidden-import stanza \
+            argos_app.py
+          rm -rf .venv build
+          find . -maxdepth 1 -name "*.spec" -delete
+
+      - name: Create new release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            argostranslate/dist/argostranslate.apps \
+            --repo ${{ github.repository }} \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes "Auto-built from main (argostranslate)."
+
+      - name: Delete old release
+        if: ${{ steps.version.outputs.old != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete "${{ steps.version.outputs.old }}" \
+            --repo ${{ github.repository }} \
+            --yes \
+            --cleanup-tag

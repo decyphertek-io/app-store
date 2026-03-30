@@ -17,13 +17,16 @@ apps:
     repo_url: https://github.com/decyphertek-io/app-store
     folder_path: argostranslate/
     executable: dist/argostranslate.apps
-    release_url: https://github.com/decyphertek-io/app-store/releases/download/argostranslate-v1.0.0/argostranslate.app
+    release_url: https://github.com/decyphertek-io/app-store/releases/download/argostranslate-v1.0.0/argostranslate.apps
     install_path: ~/.decyphertek.ai/app-store/argostranslate/
     enabled: false
 
-  ansible:
-    id: ansible
+  cloudtek:
+    id: cloudtek
     version: "1.0.0"
     repo_url: https://github.com/decyphertek-io/app-store
-    folder_path: ansible/
+    folder_path: cloudtek/
+    executable: dist/cloudtek.apps
+    release_url: https://github.com/decyphertek-io/app-store/releases/download/cloudtek-v1.0.0/cloudtek.apps
+    install_path: ~/.decyphertek.ai/app-store/cloudtek/
     enabled: false

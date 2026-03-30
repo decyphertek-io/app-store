@@ -1,0 +1,24 @@
+resource_group: vm-builder-rg
+location: eastus
+vm_size: Standard_B2s
+disk_size: 50
+no_backups: true
+
+credentials_env:
+  tenant_id: AZURE_TENANT_ID
+  subscription_id: AZURE_SUBSCRIPTION_ID
+  client_id: AZURE_CLIENT_ID
+  client_secret: AZURE_CLIENT_SECRET
+ssh_key_env: AZURE_SSH_PRIVATE_KEY
+
+profiles:
+  debian:
+    ssh_user: adminotaur
+    tags:
+      - test-debian-vm
+
+image_prefixes:
+  librechat: librechat
+
+service_profiles:
+  librechat: debian
