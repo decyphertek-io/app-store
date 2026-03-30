@@ -2,6 +2,7 @@
 """
 cloudtek — Multi-cloud VM lifecycle (AWS, GCP, Azure) via Apache libcloud.
 No cloud CLIs required for API calls. Headless CLI for agents / PyInstaller.
+Skills: libcloud (GCP/AWS/Azure), Ansible playbooks.
 Credentials: Bitwarden (`bw`) and/or ~/.cloudtek/.bw-creds (fallback ~/.claw-vm/.bw-creds).
 """
 import os
