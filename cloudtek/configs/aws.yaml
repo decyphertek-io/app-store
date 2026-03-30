@@ -1,8 +1,11 @@
+# AWS configuration — edit values or run: cloudtek configure --cloud aws
+# Values are saved to ~/.cloudtek/configs/aws.yaml on first configure run.
+
 region: us-east-1
 instance_type: t3.medium
 disk_size: 50
-vpc_id: vpc-6504011f
-security_group_id: sg-0e1723645d82979ae
+vpc_id: YOUR_VPC_ID
+security_group_id: YOUR_SECURITY_GROUP_ID
 subnet_id: default
 no_backups: true
 
@@ -13,7 +16,7 @@ ssh_key_env: AWS_SSH_PRIVATE_KEY
 
 profiles:
   debian:
-    ssh_user: adminotaur
+    ssh_user: YOUR_SSH_USER
     tags:
       - test-debian-vm
   flatcar:
@@ -22,19 +25,7 @@ profiles:
       - test-flatcar-vm
 
 image_prefixes:
-  librechat: librechat
-  opensearch: opensearch-3x
-  misp: misp
-  nextcloud: nextcloud
-  opencti: opencti
-  uptime-kuma: uptime-kuma
-  vaultwarden: vaultwarden
+  example-service: example-prefix
 
 service_profiles:
-  librechat: debian
-  opensearch: debian
-  misp: flatcar
-  nextcloud: debian
-  opencti: flatcar
-  uptime-kuma: flatcar
-  vaultwarden: flatcar
+  example-service: debian

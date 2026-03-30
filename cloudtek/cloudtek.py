@@ -579,18 +579,87 @@ PROVIDERS = {
 }
 
 
+USER_CONFIG_DIR = Path.home() / ".cloudtek" / "configs"
+
+
+def get_config_path(config_file):
+    """Return user config if present, otherwise fall back to bundled template."""
+    user_path = USER_CONFIG_DIR / config_file
+    if user_path.exists():
+        return user_path
+    return get_resource_path("configs") / config_file
+
+
 def get_provider(cloud, vault):
     if cloud not in PROVIDERS:
         print(f"[error] Unknown cloud: {cloud}. Options: gcp, aws, azure")
         sys.exit(1)
     cls, config_file = PROVIDERS[cloud]
-    config_path = get_resource_path("configs") / config_file
+    config_path = get_config_path(config_file)
     if not config_path.exists():
         print(f"[error] Config not found: {config_path}")
         sys.exit(1)
     with open(config_path) as f:
         config = yaml.safe_load(f)
     return cls(config, vault)
+
+
+def configure_cloud(cloud):
+    """Interactive setup — prompts for values and saves to ~/.cloudtek/configs/<cloud>.yaml."""
+    config_file = f"{cloud}.yaml"
+    bundled = get_resource_path("configs") / config_file
+    if bundled.exists():
+        with open(bundled) as f:
+            config = yaml.safe_load(f)
+    else:
+        config = {}
+
+    print(f"\n[cloudtek] Configure {cloud.upper()} — press Enter to keep current value\n")
+
+    prompts = {
+        "gcp": [
+            ("project", "GCP project ID"),
+            ("zone", "Zone (e.g. us-central1-a)"),
+            ("machine_type", "Machine type (e.g. n2-standard-2)"),
+            ("disk_size", "Disk size GB"),
+            ("network", "VPC network name"),
+            ("subnetwork", "Subnetwork name (leave blank for default)"),
+        ],
+        "aws": [
+            ("region", "AWS region (e.g. us-east-1)"),
+            ("instance_type", "Instance type (e.g. t3.medium)"),
+            ("disk_size", "Disk size GB"),
+            ("vpc_id", "VPC ID (e.g. vpc-xxxxxxxx)"),
+            ("security_group_id", "Security group ID (e.g. sg-xxxxxxxx)"),
+            ("subnet_id", "Subnet ID or 'default'"),
+        ],
+        "azure": [
+            ("resource_group", "Resource group name"),
+            ("location", "Location (e.g. eastus)"),
+            ("vm_size", "VM size (e.g. Standard_B2s)"),
+            ("disk_size", "Disk size GB"),
+        ],
+    }
+
+    ssh_user_prompt = "Default SSH username"
+
+    for key, label in prompts.get(cloud, []):
+        current = config.get(key, "")
+        val = input(f"  {label} [{current}]: ").strip()
+        if val:
+            config[key] = int(val) if isinstance(current, int) and val.isdigit() else val
+
+    ssh_user = input(f"  {ssh_user_prompt} [{config.get('profiles', {}).get('debian', {}).get('ssh_user', '')}]: ").strip()
+    if ssh_user:
+        config.setdefault("profiles", {}).setdefault("debian", {})["ssh_user"] = ssh_user
+
+    USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = USER_CONFIG_DIR / config_file
+    with open(out_path, "w") as f:
+        yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+
+    print(f"\n[ok] Saved to {out_path}")
+    print("[info] Run 'cloudtek configure --cloud <cloud>' again to update.")
 
 
 def main():
@@ -639,6 +708,9 @@ def main():
     p_ip.add_argument("--cloud", required=True, choices=["gcp", "aws", "azure"])
     p_ip.add_argument("--name", required=True, help="VM name")
 
+    p_configure = sub.add_parser("configure", help="Interactive setup — save cloud config to ~/.cloudtek/configs/")
+    p_configure.add_argument("--cloud", required=True, choices=["gcp", "aws", "azure"])
+
     sub.add_parser("version", help="Show version")
 
     args = parser.parse_args()
@@ -649,6 +721,10 @@ def main():
 
     if args.command == "version":
         print("cloudtek 0.1.0")
+        sys.exit(0)
+
+    if args.command == "configure":
+        configure_cloud(args.cloud)
         sys.exit(0)
 
     vault = BitwardenManager()
