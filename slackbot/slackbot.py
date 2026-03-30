@@ -13,8 +13,6 @@ import importlib.util
 from pathlib import Path
 
 import yaml
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 
 def get_resource_path(relative_path):
@@ -202,7 +200,8 @@ def post_response(client, channel: str, thread_ts: str | None, response: str):
 
 # ── App ───────────────────────────────────────────────────────────────────────
 
-def build_app(cfg: dict) -> App:
+def build_app(cfg: dict):
+    from slack_bolt import App
     app = App(token=cfg["bot_token"])
     allowed = set(filter(None, cfg.get("allowed_users", [])))
 
@@ -266,6 +265,7 @@ def main():
     except RuntimeError as e:
         print(f"{Colors.YELLOW}[WARN]{Colors.RESET} {e}")
 
+    from slack_bolt.adapter.socket_mode import SocketModeHandler
     app = build_app(cfg)
     handler = SocketModeHandler(app, cfg["app_token"])
     print(f"{Colors.GREEN}[✓]{Colors.RESET} Slackbot is running. Press Ctrl+C to stop.\n")
