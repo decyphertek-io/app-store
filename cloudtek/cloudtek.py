@@ -662,6 +662,43 @@ def configure_cloud(cloud):
     print("[info] Run 'cloudtek configure --cloud <cloud>' again to update.")
 
 
+def print_help():
+    help_text = """
+cloudtek — Multi-cloud VM lifecycle via Apache Libcloud + Ansible
+Version 0.1.0  |  Clouds: gcp, aws, azure
+Config:  ~/.cloudtek/configs/<cloud>.yaml
+Creds:   ~/.cloudtek/.bw-creds  |  BW_CLIENTID / BW_CLIENTSECRET / BW_PASSWORD
+
+─── SETUP ──────────────────────────────────────────────────────────────────────
+  cloudtek configure --cloud gcp
+  cloudtek configure --cloud aws
+  cloudtek configure --cloud azure
+
+─── VMs ────────────────────────────────────────────────────────────────────────
+  cloudtek list-vms      --cloud gcp|aws|azure
+  cloudtek launch        --cloud gcp|aws|azure  --image <name>  [--name <vm>]
+  cloudtek delete-vm     --cloud gcp|aws|azure  --name <vm>
+  cloudtek get-ip        --cloud gcp|aws|azure  --name <vm>
+
+─── IMAGES ─────────────────────────────────────────────────────────────────────
+  cloudtek list-images   --cloud gcp|aws|azure  [--filter <prefix>]
+  cloudtek delete-image  --cloud gcp|aws|azure  --name <image>
+
+─── SSH ────────────────────────────────────────────────────────────────────────
+  cloudtek ssh           --cloud gcp|aws|azure  --name <vm>
+  cloudtek ssh           --cloud gcp|aws|azure  --name <vm>  --cmd "uptime"
+
+─── ANSIBLE ────────────────────────────────────────────────────────────────────
+  cloudtek playbook      --cloud gcp|aws|azure  --name <vm>  --playbook site.yml
+  cloudtek smoke-test    --cloud gcp|aws|azure  --name <vm>
+
+─── OTHER ──────────────────────────────────────────────────────────────────────
+  cloudtek version
+  cloudtek help
+"""
+    print(help_text)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="cloudtek",
@@ -711,12 +748,17 @@ def main():
     p_configure = sub.add_parser("configure", help="Interactive setup — save cloud config to ~/.cloudtek/configs/")
     p_configure.add_argument("--cloud", required=True, choices=["gcp", "aws", "azure"])
 
+    sub.add_parser("help", help="Show full command reference")
     sub.add_parser("version", help="Show version")
 
     args = parser.parse_args()
 
     if not args.command:
-        parser.print_help()
+        print_help()
+        sys.exit(0)
+
+    if args.command == "help":
+        print_help()
         sys.exit(0)
 
     if args.command == "version":
