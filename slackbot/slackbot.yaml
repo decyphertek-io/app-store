@@ -1,0 +1,12 @@
+# slackbot.yaml — Slackbot config for Decyphertek AI
+# Env vars override these values: SLACK_BOT_TOKEN, SLACK_APP_TOKEN, SLACK_ALLOWED_USERS
+
+bot_name: decyphertek.ai
+
+# Paste your tokens here OR export them as env vars
+bot_token: "xoxb-your-bot-token-here"
+app_token: "xapp-your-app-level-token-here"
+
+# Optional: restrict to specific Slack user IDs (e.g. U012AB3CD)
+# Leave empty to allow all workspace members
+allowed_users: []
