@@ -30,3 +30,15 @@ apps:
     release_url: https://github.com/decyphertek-io/app-store/releases/download/cloudtek-v1.0.0/cloudtek.apps
     install_path: ~/.decyphertek.ai/app-store/cloudtek/
     enabled: false
+
+  slackbot:
+    id: slackbot
+    version: "1.0.0"
+    repo_url: https://github.com/decyphertek-io/app-store
+    folder_path: slackbot/
+    executable: dist/slackbot.app
+    release_url: https://github.com/decyphertek-io/app-store/releases/download/slackbot-v1.0.0/slackbot.app
+    config: slackbot.yaml
+    config_path: ~/.decyphertek.ai/app-store/slackbot/
+    install_path: ~/.decyphertek.ai/app-store/slackbot/
+    enabled: true

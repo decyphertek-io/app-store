@@ -2,9 +2,8 @@
 """
 slackbot — Slack Socket Mode bot for Decyphertek AI.
 Connects to Slack via outbound WebSocket. No public IP required.
-Credentials: slackbot.yaml or SLACK_BOT_TOKEN / SLACK_APP_TOKEN env vars.
+Credentials: ~/.decyphertek.ai/app-store/slackbot/slackbot.yaml
 """
-
 import os
 import re
 import sys
@@ -17,47 +16,120 @@ import yaml
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
+def get_resource_path(relative_path):
+    try:
+        base_path = Path(sys._MEIPASS)
+    except Exception:
+        base_path = Path(__file__).parent
+    return base_path / relative_path
+
+
+class Colors:
+    CYAN   = '\033[96m'
+    GREEN  = '\033[92m'
+    BLUE   = '\033[94m'
+    RED    = '\033[91m'
+    YELLOW = '\033[93m'
+    RESET  = '\033[0m'
+    BOLD   = '\033[1m'
+    DIM    = '\033[2m'
+
+
+logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger("slackbot")
 
-# ── ANSI strip ────────────────────────────────────────────────────────────────
-
 _ANSI = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+strip_ansi = lambda t: _ANSI.sub("", t)
+
+CONFIG_PATH = Path.home() / ".decyphertek.ai" / "app-store" / "slackbot" / "slackbot.yaml"
+
+_AGENT_SEARCH_PATHS = [
+    Path.home() / ".decyphertek.ai" / "agent-store" / "adminotaur" / "adminotaur.py",
+    Path.home() / "Documents" / "git" / "agent-store" / "adminotaur" / "adminotaur.py",
+]
 
 
-def strip_ansi(text: str) -> str:
-    return _ANSI.sub("", text)
+# ── Onboarding ────────────────────────────────────────────────────────────────
+
+def show_banner():
+    print(f"""
+{Colors.CYAN}{Colors.BOLD}
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║              {Colors.GREEN}S L A C K B O T  —  D E C Y P H E R T E K{Colors.CYAN}      ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+{Colors.RESET}
+{Colors.BLUE}    ▸ SOCKET MODE — NO PUBLIC IP REQUIRED
+    ▸ ROUTES MESSAGES TO ADMINOTAUR AGENT
+    ▸ FIRST RUN: FOLLOW THE SETUP STEPS BELOW
+{Colors.RESET}""")
 
 
-# ── Config loader ─────────────────────────────────────────────────────────────
+def show_setup_instructions():
+    print(f"""{Colors.CYAN}{Colors.BOLD}  SLACK APP SETUP{Colors.RESET}
+{Colors.DIM}  ─────────────────────────────────────────────────────{Colors.RESET}
+
+  {Colors.YELLOW}1.{Colors.RESET} Go to {Colors.BLUE}https://api.slack.com/apps{Colors.RESET}
+     → Create New App → From scratch → name it {Colors.GREEN}Adminotaur{Colors.RESET}
+
+  {Colors.YELLOW}2.{Colors.RESET} {Colors.BOLD}Enable Socket Mode{Colors.RESET}
+     → Left sidebar: Socket Mode → toggle ON
+     → Generate App-Level Token — scope: {Colors.GREEN}connections:write{Colors.RESET}
+     → Copy the {Colors.GREEN}xapp-...{Colors.RESET} token
+
+  {Colors.YELLOW}3.{Colors.RESET} {Colors.BOLD}Bot Token Scopes{Colors.RESET} (OAuth & Permissions → Bot Token Scopes)
+     → Add: {Colors.GREEN}app_mentions:read  chat:write  im:history  im:read  im:write{Colors.RESET}
+
+  {Colors.YELLOW}4.{Colors.RESET} {Colors.BOLD}Subscribe to Bot Events{Colors.RESET} (Event Subscriptions → toggle ON)
+     → Add: {Colors.GREEN}app_mention  message.im{Colors.RESET}
+
+  {Colors.YELLOW}5.{Colors.RESET} {Colors.BOLD}Install App{Colors.RESET} → Install to Workspace → Allow
+     → Copy the {Colors.GREEN}xoxb-...{Colors.RESET} Bot User OAuth Token
+
+{Colors.DIM}  ─────────────────────────────────────────────────────{Colors.RESET}
+""")
+
+
+def onboard() -> dict:
+    show_banner()
+    show_setup_instructions()
+
+    print(f"{Colors.BLUE}[SETUP]{Colors.RESET} No config found. Let's configure slackbot.\n")
+
+    bot_token = input(f"  {Colors.GREEN}Bot Token{Colors.RESET} (xoxb-...): ").strip()
+    if not bot_token.startswith("xoxb-"):
+        print(f"\n{Colors.RED}[ERROR]{Colors.RESET} Bot token must start with xoxb-. Exiting.\n")
+        sys.exit(1)
+
+    app_token = input(f"  {Colors.GREEN}App Token{Colors.RESET} (xapp-...): ").strip()
+    if not app_token.startswith("xapp-"):
+        print(f"\n{Colors.RED}[ERROR]{Colors.RESET} App token must start with xapp-. Exiting.\n")
+        sys.exit(1)
+
+    cfg = {"bot_token": bot_token, "app_token": app_token, "allowed_users": []}
+
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(CONFIG_PATH, "w") as f:
+        yaml.dump(cfg, f, default_flow_style=False)
+
+    print(f"\n{Colors.GREEN}[✓]{Colors.RESET} Config saved to {CONFIG_PATH}\n")
+    return cfg
+
 
 def load_config() -> dict:
-    """Load config from slackbot.yaml next to this file, then env vars override."""
-    cfg = {}
-    yaml_path = Path(__file__).parent / "slackbot.yaml"
-    if yaml_path.exists():
-        with open(yaml_path) as f:
-            cfg = yaml.safe_load(f) or {}
-        log.info("Loaded config from %s", yaml_path)
+    if not CONFIG_PATH.exists():
+        return onboard()
 
-    # Env vars always win
+    with open(CONFIG_PATH) as f:
+        cfg = yaml.safe_load(f) or {}
+
     cfg["bot_token"] = os.environ.get("SLACK_BOT_TOKEN", cfg.get("bot_token", ""))
     cfg["app_token"] = os.environ.get("SLACK_APP_TOKEN", cfg.get("app_token", ""))
-    cfg["allowed_users"] = os.environ.get(
-        "SLACK_ALLOWED_USERS", ",".join(cfg.get("allowed_users", []))
-    ).split(",") if os.environ.get("SLACK_ALLOWED_USERS") else cfg.get("allowed_users", [])
-    cfg["bot_name"] = cfg.get("bot_name", "Adminotaur")
 
-    if not cfg["bot_token"]:
-        log.error("SLACK_BOT_TOKEN is not set.")
-        sys.exit(1)
-    if not cfg["app_token"]:
-        log.error("SLACK_APP_TOKEN is not set.")
+    if not cfg.get("bot_token") or not cfg.get("app_token"):
+        print(f"{Colors.RED}[ERROR]{Colors.RESET} Missing tokens in {CONFIG_PATH}. Delete it to re-run setup.")
         sys.exit(1)
 
     return cfg
@@ -65,13 +137,6 @@ def load_config() -> dict:
 
 # ── Adminotaur loader ─────────────────────────────────────────────────────────
 
-# Locations to search for adminotaur.py, most specific first
-_AGENT_SEARCH_PATHS = [
-    Path.home() / ".decyphertek.ai" / "agent-store" / "adminotaur" / "adminotaur.py",
-    Path.home() / "Documents" / "git" / "agent-store" / "adminotaur" / "adminotaur.py",
-]
-
-# Cached agent instances keyed by Slack user_id for isolated memory per user
 _agents: dict = {}
 _agent_module = None
 
@@ -86,7 +151,7 @@ def _load_agent_module():
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             _agent_module = mod
-            log.info("Adminotaur module loaded from %s", path)
+            print(f"{Colors.GREEN}[✓]{Colors.RESET} Adminotaur loaded from {path}")
             return mod
     raise RuntimeError(
         "Adminotaur not found. Checked:\n" + "\n".join(str(p) for p in _AGENT_SEARCH_PATHS)
@@ -94,35 +159,30 @@ def _load_agent_module():
 
 
 def get_agent(user_id: str):
-    """Return a per-user Adminotaur instance (creates one on first use)."""
     if user_id not in _agents:
         mod = _load_agent_module()
-        log.info("Creating Adminotaur instance for user %s", user_id)
+        print(f"{Colors.BLUE}[AGENT]{Colors.RESET} New session for user {user_id}")
         _agents[user_id] = mod.Adminotaur()
     return _agents[user_id]
 
 
 def ask_adminotaur(user_id: str, text: str) -> str:
-    """Send text to the user's Adminotaur instance and return the response."""
     try:
         agent = get_agent(user_id)
         response = agent.process(text)
         return strip_ansi(response or "").strip() or "(no response)"
     except Exception as exc:
         log.exception("Adminotaur error for user %s", user_id)
-        return f"Error talking to Adminotaur: {exc}"
+        return f"Error: {exc}"
 
 
 # ── Slack helpers ─────────────────────────────────────────────────────────────
 
 def clean_message(text: str, bot_user_id: str) -> str:
-    """Strip @bot mentions and leading/trailing whitespace from a message."""
-    text = re.sub(rf"<@{re.escape(bot_user_id)}>", "", text)
-    return text.strip()
+    return re.sub(rf"<@{re.escape(bot_user_id)}>", "", text).strip()
 
 
 def split_blocks(text: str, limit: int = 3000) -> list[str]:
-    """Split long responses into chunks that fit Slack's block limit."""
     chunks = []
     while len(text) > limit:
         split_at = text.rfind("\n", 0, limit)
@@ -136,18 +196,11 @@ def split_blocks(text: str, limit: int = 3000) -> list[str]:
 
 
 def post_response(client, channel: str, thread_ts: str | None, response: str):
-    """Post a (possibly multi-chunk) response back to Slack."""
-    chunks = split_blocks(response)
-    for i, chunk in enumerate(chunks):
-        client.chat_postMessage(
-            channel=channel,
-            thread_ts=thread_ts,
-            text=chunk,
-            mrkdwn=True,
-        )
+    for chunk in split_blocks(response):
+        client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=chunk, mrkdwn=True)
 
 
-# ── App setup ─────────────────────────────────────────────────────────────────
+# ── App ───────────────────────────────────────────────────────────────────────
 
 def build_app(cfg: dict) -> App:
     app = App(token=cfg["bot_token"])
@@ -156,67 +209,47 @@ def build_app(cfg: dict) -> App:
     def _allowed(user_id: str) -> bool:
         return not allowed or user_id in allowed
 
-    def _handle(user_id: str, text: str, say, client, channel: str, thread_ts: str | None):
+    def _handle(user_id, text, say, client, channel, thread_ts):
         if not _allowed(user_id):
             log.warning("Blocked unauthorized user %s", user_id)
             return
-
         if not text:
-            say(text="Say something and I'll pass it to Adminotaur.", thread_ts=thread_ts)
+            say(text="Send me a message and I'll pass it to Adminotaur.", thread_ts=thread_ts)
             return
 
-        # Show typing indicator
-        try:
-            client.assistant_threads_setStatus(
-                channel_id=channel,
-                thread_ts=thread_ts or "",
-                status="is thinking...",
-            )
-        except Exception:
-            pass  # Not all app configs support this — ignore
-
-        log.info("User %s → %s", user_id, text[:120])
+        print(f"{Colors.CYAN}[MSG]{Colors.RESET} {user_id}: {text[:120]}")
         start = time.time()
         response = ask_adminotaur(user_id, text)
-        elapsed = time.time() - start
-        log.info("Response in %.1fs: %s", elapsed, response[:120])
-
+        print(f"{Colors.GREEN}[REPLY]{Colors.RESET} {time.time()-start:.1f}s — {response[:120]}")
         post_response(client, channel, thread_ts, response)
 
-    # ── Event: app_mention (@bot in a channel) ────────────────────────────────
     @app.event("app_mention")
     def handle_mention(event, say, client):
-        user_id = event.get("user", "unknown")
-        raw_text = event.get("text", "")
-        channel = event.get("channel", "")
-        thread_ts = event.get("thread_ts") or event.get("ts")
-
-        # Resolve bot user ID to strip mention prefix
         try:
             bot_id = client.auth_test()["user_id"]
         except Exception:
             bot_id = ""
+        _handle(
+            event.get("user", "unknown"),
+            clean_message(event.get("text", ""), bot_id),
+            say, client,
+            event.get("channel", ""),
+            event.get("thread_ts") or event.get("ts"),
+        )
 
-        text = clean_message(raw_text, bot_id)
-        _handle(user_id, text, say, client, channel, thread_ts)
-
-    # ── Event: direct message ─────────────────────────────────────────────────
     @app.event("message")
     def handle_dm(event, say, client):
-        # Only handle DMs (channel_type == "im"), skip bot messages and edits
         if event.get("channel_type") != "im":
             return
-        if event.get("subtype"):
+        if event.get("subtype") or event.get("bot_id"):
             return
-        if event.get("bot_id"):
-            return
-
-        user_id = event.get("user", "unknown")
-        text = event.get("text", "").strip()
-        channel = event.get("channel", "")
-        thread_ts = event.get("thread_ts") or event.get("ts")
-
-        _handle(user_id, text, say, client, channel, thread_ts)
+        _handle(
+            event.get("user", "unknown"),
+            event.get("text", "").strip(),
+            say, client,
+            event.get("channel", ""),
+            event.get("thread_ts") or event.get("ts"),
+        )
 
     return app
 
@@ -225,17 +258,17 @@ def build_app(cfg: dict) -> App:
 
 def main():
     cfg = load_config()
-    log.info("Starting %s via Socket Mode...", cfg["bot_name"])
+    show_banner()
+    print(f"{Colors.BLUE}[SYSTEM]{Colors.RESET} Starting slackbot via Socket Mode...\n")
 
-    # Pre-load the agent module at startup so first message isn't slow
     try:
         _load_agent_module()
     except RuntimeError as e:
-        log.warning("Agent pre-load skipped: %s", e)
+        print(f"{Colors.YELLOW}[WARN]{Colors.RESET} {e}")
 
     app = build_app(cfg)
     handler = SocketModeHandler(app, cfg["app_token"])
-    log.info("%s is running. Press Ctrl+C to stop.", cfg["bot_name"])
+    print(f"{Colors.GREEN}[✓]{Colors.RESET} Slackbot is running. Press Ctrl+C to stop.\n")
     handler.start()
 
 
