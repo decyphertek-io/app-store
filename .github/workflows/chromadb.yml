@@ -1,11 +1,7 @@
 name: Build ChromaDB
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'chromadb/**'
+  workflow_dispatch:
 
 jobs:
   build:

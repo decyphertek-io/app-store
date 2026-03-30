@@ -1,11 +1,7 @@
 name: Build Argos Translate
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'argostranslate/**'
+  workflow_dispatch:
 
 jobs:
   build:
